@@ -40,9 +40,29 @@ class Control:
         self.varmap[0][3][0].trace_add("write", lambda *args: self.modify_animation_matrix(3,0))
         self.varmap[0][3][1].trace_add("write", lambda *args: self.modify_animation_matrix(3,1))
         self.varmap[0][3][2].trace_add("write", lambda *args: self.modify_animation_matrix(3,2))
+        self.addlabel(0,4,0, "Current animation duration:", cspan=3)
+        self.addentry(0,5,0,None, None, None, None,default="10", cspan=3)
+        self.varmap[0][5][0].trace_add("write", lambda *args: self.update_animation_duration(5,0))
+        self.addbutton(0,6,0, 
+                       "Hide coordinates" if self.render.setting["show_coordinates"] else "Show coordinates", 
+                       command = lambda *arg: self.toggle_show_coordinate(), cspan=3
+        )
+
+    def toggle_show_coordinate(self):
+        self.render.setting["show_coordinates"] = not self.render.setting["show_coordinates"]
+        self.refresh_widget(0,6,0)
+        self.addbutton(0,6,0, "Hide coordinates" if self.render.setting["show_coordinates"] else "Show coordinates", lambda *arg: self.toggle_show_coordinate(), cspan=3)
+
+    def update_animation_duration(self, row, col): 
+        currentVar = self.varmap[0][row][col].get().strip()
+        if(currentVar!="" and currentVar != "0"):
+            try:
+                self.render.setting["animation_duration"] = float(currentVar) * 1000
+            except Exception as e:
+                print(e)
 
     def modify_animation_matrix(self, row, col):
-        currentVar = self.varmap[0][row][col].get()
+        currentVar = self.varmap[0][row][col].get().strip()
         if(currentVar!=""):
             try:
                 self.render.animation[row-1][col] = int(currentVar)

@@ -8,6 +8,11 @@ from control import Control
 
 class SoftwareRender:
     def __init__(self) -> None:
+        self.setting = {
+            "clipping_mode": False,
+            "show_coordinates": False,
+            "animation_duration": 10000,
+        } 
         self.pool = futures.ThreadPoolExecutor(max_workers=10)
         self.pool.submit(self.tkinit)
         pg.init()
@@ -19,14 +24,13 @@ class SoftwareRender:
         self.screen = pg.display.set_mode((1600, 900))
         self.clock = pg.time.Clock()
         self.create_objects()  
-        self.setting = {
-            "clipping_mode": False,
-            "show_coordinates": False,
-            "animation_duration": 10000,
-        }     
+   
 
     def tkinit(self):
-        Control("Control",self)
+        try:
+            Control("Control",self)
+        except Exception as e:
+            print(e)
 
     def create_objects(self):
         self.transformation_arr2 = np.array(

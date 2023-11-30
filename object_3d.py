@@ -99,7 +99,7 @@ class Object3D:
                             str(
                                 np.round(
                                     coord_v[index]
-                                    @ self.get_animation_step(10000),
+                                    @ self.get_animation_step(),
                                     decimals=2,
                                 )[:3]
                             ),
