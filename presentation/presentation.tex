@@ -1,0 +1,504 @@
+\documentclass[11pt]{article}
+
+\usepackage{multirow}
+\usepackage{mathtools}
+\usepackage{amsmath,amsthm,amssymb, amsfonts}
+\usepackage{relsize}
+\usepackage{graphicx}
+\graphicspath{ {./} }
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+%description -> general document format:
+\newcommand{\boldtext}[1]{\textbf{#1}}
+
+\newcommand{\image}[2]{\includegraphics[scale=#1]{#2}}
+
+\newcommand{\cimage}[3]{
+    \begin{figure}[!ht]
+        \centering
+        \includegraphics[scale=#1]{#2}
+        \caption{#3}
+        \label{fig:enter-label}
+    \end{figure}
+}
+
+\newcommand{\mysection}[1]{
+    \section*{#1}
+    \hrule
+    \vspace*{0.5cm}
+}
+
+\newcommand{\mysubsection}[1]{
+    \subsection*{· #1}
+}
+
+%description -> general math format:
+\newcommand{\myunderscore}[2]{
+    \underbrace{#1}_\text{#2}
+}
+
+\newcommand{\twolinesplit}[3]{
+    \begin{equation*}
+        #1
+        \begin{cases}
+             & #2   \\
+             & #3
+        \end{cases}
+    \end{equation*}
+}
+
+\newcommand{\threelinesplit}[4]{
+    \begin{equation*}
+        #1
+        \begin{cases}
+             & #2   \\
+             & #3   \\
+             & #4
+        \end{cases}
+    \end{equation*}
+}
+
+%description -> discrete mathematics:
+\newcommand{\R}{\mathbb{R}} % Real numbers
+\newcommand{\N}{\mathbb{N}} % Natural numbers
+\newcommand{\Z}{\mathbb{Z}} % Integers
+\newcommand{\Q}{\mathbb{Q}} % Rational numbers
+\newcommand{\set}[1]{\{#1\}} % items wrapped in a set
+\newcommand{\powerset}[1]{\mathcal{P}(#1)} % items wrapped in a powerset
+\newcommand{\floor}[1]{\lfloor #1 \rfloor} % floor notation
+\newcommand{\floorfrac}[2]{\lfloor \cfrac{#1}{#2} \rfloor} % floor notation but with a fraction inside
+\newcommand{\ceil}[1]{\lceil #1 \rceil} % ceiling notation
+\newcommand{\ceilfrac}[2]{\lceil \cfrac{#1}{#2} \rceil} % ceiling notation but with a fraction inside
+\newcommand{\Lsum}[2]{\mathlarger{\sum}_{#1}^{#2}} % a larger sigma notation
+\newcommand{\hfrac}[2]{\left(\cfrac{#1}{#2}\right)} % a "high" fraction where parathasis's height is adjusted to fit the fraction
+\newcommand{\RR}[1]{\mathcal{R}_#1} % testing -> Relational (temporal)
+\renewcommand{\R}{\mathcal{R}} % testing -> Relational (temporal)
+
+%description -> linear algebra:
+
+\renewcommand{\det}[1]{
+    $\begin{vmatrix*}[r] #1 \end{vmatrix*}$
+}
+
+\newcommand{\mateq}{$\backsim$}
+\newcommand{\mat}[1]{
+    $\begin{bmatrix*}[r]
+        #1
+    \end{bmatrix*}$
+} % general matrix
+
+\newcommand{\ilmat}[1]{
+    \begin{bmatrix*}[r]
+        #1
+    \end{bmatrix*}
+} % general matrix
+
+\newcommand{\tomat}[2]{
+    $\begin{bmatrix*}[r]
+        #1 \\
+        #2
+    \end{bmatrix*}$
+} % two-one matrix
+
+\newcommand{\ttmat}[4]{
+    $\begin{bmatrix*}[r]
+        #1 & #2 \\
+        #3 & #4
+    \end{bmatrix*}$
+} % two-two matrix
+
+\newcommand{\thmat}[3]{
+    $\begin{bmatrix*}[r] 
+        #1 \\ 
+        #2 \\
+        #3 
+    \end{bmatrix*}$
+} % three-three matrix (line combined form) (specific element in line omitted)
+
+\newcommand{\mytable}[2]{
+    \begin{center}
+        \begin{tabular}{#1}
+            #2
+        \end{tabular}
+    \end{center}
+}
+
+\newcommand{\myalign}[1]{\begin{align*}#1\end{align*}}
+\newcommand{\gap}{\vspace*{0.5cm}}
+\newcommand{\linearsec}[1]{
+    \section*{Question #1}
+    \hrule
+    \vspace*{0.5cm}
+}
+
+\title{Mini 3D Engine}
+\author{David Cao}
+\date{Dec 10}
+
+\begin{document}
+
+\maketitle
+
+\mysection{Problem Statement (Computer Graphics)}
+Given the ability to draw point, lines, and access to time \\
+(1) Can we create a computer program that mimics a 3D object? \\
+(2) Can we have a camera and have free control to the camera, moving it left, right, top, down, forward, backward, rotating it upward, downward, leftward and rightward? \\
+(3) Can we create a method to visualize a linear transformation of a 3D object using the computer program we just created? 
+\mysection{Why Linear Algebra?}
+Compare to simple algebra, linear algebra and matrices gives us some unique advantages:
+\begin{enumerate}
+    \item Better visualization and geometric representation
+    \item Allows composition (multiplication of matrices) to represent complex operations
+    \item Optimized for computer hardwares
+\end{enumerate}
+
+\mysection{Visualizing a 3D Object}
+In order to have a 3D object, it must have three properties: width, height, and depth, which we denote to be x, y, and z value. \gap \\
+Using the simplist object - a sqaure, we can use an 3x1 vector \mat{x\\y\\z} to denote eight of its vertices. However, for the simplicity of matrix calculation (you will see what that means in a second), we use a 4x1 vector \mat{x\\y\\z\\w} with "w" denoting the homogenous coordinate (you will see what that means in a second as well) Moreover, in order to get the shape of the square, we can use vectors to store the polygon faces: \gap \\
+\cimage{0.3}{cube}{}
+
+We can use the coordinate to describe the faces of the cube, namely: 
+\mat{
+    (0, 1, 2, 3), \\
+    (4, 5, 6, 7), \\
+    (0, 4, 5, 1), \\
+    (2, 3, 7, 6), \\
+    (1, 2, 6, 5), \\
+    (0, 3, 7, 4), \\
+} with each number in the vector denoting a vertex number displayed in the graph \gap \\
+\mysection{Elementary Operations for 3D Objects}
+For a 3D object, we want to be able to perform the following elementary operations:
+\begin{enumerate}
+    \item translation
+    \item rotation
+    \item scaling
+\end{enumerate}
+We notice that those operations can be represented by linear algebra:
+\subsection{translation}
+By translation, we mean shifting the object in the x, y, and z direction by some amount, which is represented by the graph below: \\
+\mysection{
+    \image{0.5}{translation}{}
+}
+With a 3x1 vector denoting the original position to be \mat{x\\y\\z} and shifting a unit in the x-axis, b unit in the y-axis, and c unit in z-axis, we can denote the new coordinate to be: \mat{x + a \\ y + b \\ z + c}
+It is tempting to represent this new vector by a matrix multiplication like this: 
+\mat{
+    1 & \_ & \_ \\
+    \_ & 1 & \_ \\
+    \_ & \_ & 1 \\
+} \mat {x \\ y \\ z} = \mat{x + a \\ y + b \\ z + c}
+However, it's not possible using a 3x3 matrix, since we do not want any resulting term to be a variable of the other coordinate. Here comes the homogenous coordinate system: \\
+For ease of calculation and representation, we add an extra dimension to our matrix (we want to keep w to 1 in this case, you will see why later in projection matrix): \gap \\
+\mat{
+    1 & \_ & \_ & \_\\
+    \_ & 1 & \_ & \_\\
+    \_ & \_ & 1 & \_\\
+    \_ & \_ & \_ & 1 \\
+} \mat {x \\ y \\ z \\ 1} = \mat{x + a \\ y + b \\ z + c \\ 1} If we to try to find a matrix satisfying this condition, by properties of matrix multiplication, we can see that:
+\mat{
+    1 & \_ & \_ & a\\
+    \_ & 1 & \_ & b\\
+    \_ & \_ & 1 & c\\
+    \_ & \_ & \_ & 1 \\
+} \mat {x \\ y \\ z \\ 1} = \mat{x + a \\ y + b \\ z + c \\ 1} satisfy such condition. Put into simple term, here's our translation matrix: \gap \\
+\begin{center}
+    $T(a,b,c)$ = \mat{
+    1 & 0 & 0 & a\\
+    0 & 1 & 0 & b\\
+    0 & 0 & 1 & c\\
+    0 & 0 & 0 & 1 \\
+}
+\end{center}
+
+\subsection{rotation}
+We also want to perform rotation on our object, which can be achieved by furthur seperating the rotation into: 
+\begin{enumerate}
+    \item rotate around the x-axis
+    \item rotate around the y-axis
+    \item rotate around the z-axis
+\end{enumerate}
+Putting it in 2D first, we have this graph: \\
+\mysection{
+    \image{0.35}{rotation}{}
+} 
+We notice that this is a rotation along the z-axis since it's rotating in the xy cut plane. Therefore, we yield our rotational matrix in respect to z axis, and consequently x and y axis shown below (the image doesn't have a homogenous coordinate by the way): \\
+\begin{center}
+    $R_x(\theta) = $\mat{
+        1 & 0 & 0 & 0 \\
+        0 & \cos(\theta) & -\sin(\theta) & 0 \\
+        0 & \sin(\theta) & \cos(\theta) & 0 \\
+        0 & 0 & 0 & 1
+    } \gap \\
+    $R_y(\beta) = $\mat{
+        \cos(\beta) & 0 & \sin(\beta) & 0 \\
+        0 & 1 & 0 & 0 \\
+        -\sin(\beta) & 0 & \cos(\beta) & 0 \\
+        0 & 0 & 0 & 1
+    } \gap \\
+    $R_z(\gamma) = $\mat{
+        \cos(\gamma) & -\sin(\gamma) & 0 & 0 \\
+        \sin(\gamma) & \cos(\gamma) & 0 & 0 \\
+        0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 1
+    }
+\end{center}
+\subsection{scaling}
+The scaling matrix is the simplist among all, we can intuitively come up with the scale matrix to be: \\
+\begin{center}
+    $S_v(n)$ = \mat{
+    n & 0 & 0 & 0 \\
+    0 & n & 0 & 0 \\
+    0 & 0 & n & 0 \\
+    0 & 0 & 0 & 1
+}
+\end{center}
+However, we do want to generalize the scaling matrix so that it is able to scale individually on the x-axis, y-axis, and z-axis, luckily, linear algebra gives us the tool to achieve that, it is also very simple:
+\begin{center}
+    $S_v(n_x, n_y, n_z)$ = \mat{
+    n_x & 0 & 0 & 0 \\
+    0 & n_y & 0 & 0 \\
+    0 & 0 & n_z & 0 \\
+    0 & 0 & 0 & 1
+}
+\end{center}
+\mysection{Visualize the camera and projection}
+Now we want to add our camera, and obviously we want to place ourself at the camera's view, the grey rectangle will be the picture displayed on our screen, the image is shown below:
+\begin{center}
+    \image{0.5}{view}{}
+\end{center}
+Notice that in our case, x is width, y is height, and z is depth, meaning that our coordinate system is different
+\mysection{Orthographic Projection}
+As shown in the image above, such behavior is called projection. It's obviously difficult to figure out everything at the same time, however, we can ultilize the fact that composition of linear transformation perserves its linearity. We will begin with something called orthographic projection (a method of projection in which an object is depicted or a surface mapped using parallel lines to project its shape onto a plane) \gap \\
+Imagine we have a rectanglular view space, we need to achieve a couple key objectives:
+\begin{enumerate}
+    \item We want to put the center of the view space to the origion
+    \item We want to limit the finished projection coordinate into x ranging from -1 to 1, y ranging from -1 to 1, and z ranging from 0 to 1
+    \item We want to know which z value comes first (we do not want to render things that is blocked)
+\end{enumerate}
+\begin{center}
+    \image{0.6}{orthographic_projection}{}
+\end{center}
+To achieve our first objective, we want to ultilize the translation matrix that we discovered previously. In order to successfully perform the translation, we need to know a couple of values, namely, left, right, top, bottom, far, and near. Our translation matrix will then be:
+\begin{center}
+    $T(\cfrac{r+l}{2},\cfrac{b+t}{2},n)$ = \mat{
+        1 & 0 & 0 & \cfrac{r+l}{2}\\
+        0 & 1 & 0 & \cfrac{b+t}{2}\\
+        0 & 0 & 1 & n\\
+        0 & 0 & 0 & 1 \\
+    }
+\end{center}
+To achieve our second objective, we want to ultilize the scaling matrix that we initially discovered: 
+\begin{center}
+    $S_v(\cfrac{2}{r-l}, \cfrac{2}{b-t}, \cfrac{1}{f-n})$ = \mat{
+    \cfrac{2}{r-l} & 0 & 0 & 0 \\
+    0 & \cfrac{2}{b-t} & 0 & 0 \\
+    0 & 0 & \cfrac{1}{f-n} & 0 \\
+    0 & 0 & 0 & 1
+}
+\end{center}
+We can also observe that our third objective is already met since we know the exact z value of the projected object (You will see why this is a key objective later) \gap \\
+Finally, if we are to composite the matrix, we obtain our orthographic projection matrix:
+\begin{center}
+    $T(\cfrac{r+l}{2},\cfrac{b+t}{2},n) \times S_v(\cfrac{2}{r-l}, \cfrac{2}{b-t}, f-n)$ = \mat{
+        \cfrac{2}{r-l} & 0 & 0 & -\cfrac{r+l}{r-l}\\
+        0 & \cfrac{2}{b-t} & 0 & -\cfrac{b+t}{b-t}\\
+        0 & 0 & \cfrac{1}{f-n} & -\cfrac{n}{f-n} \\
+        0 & 0 & 0 & 1
+    }
+\end{center}
+
+\mysection{Prospective Projection Matrix (The Hard Part)}
+Now instead of a parallel transformation, our view space is a frustum. The difference between orthographic projection vs perspective projection is shown below:
+\begin{center}
+    \image{0.4}{o_v_p}
+\end{center}
+\begin{center}
+    \image{0.4}{perspective_projection_1}
+\end{center}
+\begin{center}
+    \image{0.4}{perspective_projection_2}
+\end{center}
+To better understand the problem, we draw a sidevew of the 3D world:
+\begin{center}
+    \image{0.8}{perspective_projection_3}
+\end{center}
+We can observe that there's a pair of similar triangle in this shape. Therefore, we get that:
+\myalign{
+    & \cfrac{y_s}{n} = \cfrac{y}{z} \\
+    & y_s = \cfrac{ny}{z} \\
+    & x_s = \cfrac{nx}{z} \\
+}
+Ignoring z for now, we need a matrix such that: 
+\mat{
+    \_ & \_ & \_ & \_ \\
+    \_ & \_ & \_ & \_ \\
+    \_ & \_ & \_ & \_ \\
+    \_ & \_ & \_ & \_ \\
+} \mat{
+    x \\ y \\ z \\ 1
+} = \mat{
+    \cfrac{nx}{z} \\ \cfrac{ny}{z} \\ z \\ 1
+} \gap
+However, we can observe that it is simply not possible for us to get this matrix since it involves division and we do not know z prior. \\
+Here we introduce anothe property of homogenous coordinates, , which is that we finding the actual x, y, z value of the 4x1 vector, we divide the x, y, and z value by w \\
+\begin{center}
+    \mat{
+    x \\ y \\ z \\ 1
+} = \mat{
+    2x \\ 2y \\ 2z \\ 2
+} = \mat{
+    wx \\ wy \\ wz \\ w
+}
+\end{center}
+Here we can ultilize homogenous coordinate:
+\mat{
+    \_ & \_ & \_ & \_ \\
+    \_ & \_ & \_ & \_ \\
+    \_ & \_ & \_ & \_ \\
+    \_ & \_ & \_ & \_ \\
+} \mat{
+    x \\ y \\ z \\ 1
+} = \mat{
+    nx \\ ny \\ z^2 \\ z
+} = \mat{
+    \cfrac{nx}{z} \\ \cfrac{ny}{z} \\ z \\ 1
+} \gap
+It is easy to find row 1, 2, and 4 for our matrix:
+\mat{
+    n & 0 & 0 & 0 \\
+    0 & n & 0 & 0 \\
+    \_ & \_ & \_ & \_ \\
+    0 & 0 & 1 & 0 \\
+} However, it takes some derivation to find the third row. First we realize that the first and second term must be 0 since we do not want z to be a variable of x and y, so we can set our 3rd term to be $m_1$ and 4th term to be $m_2$
+which our matrix becomes:\mat{
+    n & 0 & 0 & 0 \\
+    0 & n & 0 & 0 \\
+    0 & 0 & m_1 & m_1 \\
+    0 & 0 & 1 & 0 \\
+} \mat{
+    x \\ y \\ z \\ 1
+} = \mat{
+    nx \\ ny \\ z^2 \\ z
+} and thus $m_1z + m_2 = z^2$. Among the z-axis, the only two value that we know of(we define of) are the near plane and far plane, which we yield a system of equations:
+\twolinesplit{}{m_1n+m_2=n^2}{m_1f+m_2 = f^2}
+\twolinesplit{}{m_1=f+n}{m_2 = -fn}
+We can see that this is a quadratic equation which is only true when $z = n$(near plane) and $z = f$(far plane) To explore the intermediate behavior of z, we have a graph of z-input and z-output below:
+\begin{center}
+    \image{0.7}{find_z}
+\end{center}
+Although the result is non-linear and contains error, it doesn't affect our goal:
+\begin{enumerate}
+    \item We want to put the center of the view space to the origion
+    \item We want to limit the finished projection coordinate into x ranging from -1 to 1, y ranging from -1 to 1, and z ranging from 0 to 1
+    \item We want to know which z value comes first (we do not want to render things that is blocked)
+\end{enumerate}
+Error in z value doesn't affect the order of z-value, so we can still use the resulting value to calculate which item is blocked. \\
+Therefore, since linearity is perserved when multiplying matrices, we yield our general perspective projection matrix (finally): \\
+\mat{
+    \cfrac{2}{r-l} & 0 & 0 & -\cfrac{r+l}{r-l}\\
+    0 & \cfrac{2}{b-t} & 0 & -\cfrac{b+t}{b-t}\\
+    0 & 0 & \cfrac{1}{f-n} & -\cfrac{n}{f-n} \\
+    0 & 0 & 0 & 1
+} \mat{
+    n & 0 & 0 & 0 \\
+    0 & n & 0 & 0 \\
+    0 & 0 & f+n & -fn \\
+    0 & 0 & 1 & 0 \\ 
+} = \mat{
+    \cfrac{2n}{r-l} & 0 & -\cfrac{r+l}{r-l} & 0\\
+    0 & \cfrac{2n}{b-t} & -\cfrac{b+t}{b-t} & 0\\
+    0 & 0 & \cfrac{f}{f-n} & -\cfrac{fn}{f-n} \\
+    0 & 0 & 1 & 0
+} \\
+Luckily, it's common for the camera to be place at the very center of the view, which means that $r = -l$ and $t = -b$, therefore, we simplify the projection matrix to be:
+\begin{center}
+    \mat{
+    \cfrac{n}{r} & 0 & 0 & 0\\
+    0 & \cfrac{n}{b} & 0 & 0\\
+    0 & 0 & \cfrac{f}{f-n} & -\cfrac{fn}{f-n} \\
+    0 & 0 & 1 & 0
+} 
+\end{center}
+We are not over yet however, from our perspective matrix, we can observe that besides the value of near plane and far plane, we also need to know right and bottom of our view, which is not very convenient, instead, we use something called field of view. The field of view is that part of the world that is visible through the camera at a particular position and orientation in space. 
+\begin{center}
+    \image{0.5}{field_of_view}
+\end{center}
+\begin{center}
+    \image{0.5}{field_of_view_2}
+\end{center}
+By trigonometry, we can easily find that $b = n \cdot tan(\frac{\theta}{2})$, obtaining $b$, we can multiply the aspect ratio of the screen which is $\cfrac{w}{h}$, so $r = \cfrac{nw}{h}\cdot tan(\frac{\theta}{2})$, substituting the values to the projection matrix, we get:
+\begin{center}
+    $P(f,n,\theta)$ = \mat{
+    \cfrac{h}{w \cdot tan(\frac{\theta}{2})} & 0 & 0 & 0\\
+    0 & \cfrac{1}{tan(\frac{\theta}{2})} & 0 & 0\\
+    0 & 0 & \cfrac{f}{f-n} & -\cfrac{fn}{f-n} \\
+    0 & 0 & 1 & 0
+} 
+\end{center}
+\mysection{Putting Everything Together}
+To put everything together, let's recap all the transformation needed: \\
+\begin{enumerate}
+    \item With the user granted the ability to move the camera, we always want the camera to stay at the origin, we must apply translation matrix 
+    \item With the user granted the ability to rotate the camera, we always want the camera to stay at the origin, we must apply rotation matrix 
+    \item Apply the perspective projection matrix
+    \item In order to convert the normalized device coordinates (x from -1 to 1, y from -1 to 1, z from 0 to 1), we want to apply a viewport transformation matrix
+\end{enumerate}
+For step 4, we want a matrix that perform such transformation:
+\begin{center}
+    \image{0.6}{to_screen}
+\end{center}
+If we observe it closely, this transformation involves a scaling and a translation, which we can then derive the to screen matrix:
+\begin{center}
+    $V(h,w)$ = \mat{
+        1 & 0 & 0 & \cfrac{w}{2} \\
+        0 & 1 & 0 & \cfrac{h}{2} \\
+        0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 1
+    } \mat{
+        \cfrac{w}{2} & 0 & 0 & 0 \\
+        0 & -\cfrac{h}{2} & 0 & 0 \\
+        0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 1
+    } = \mat{
+        \cfrac{w}{2} & 0 & 0 & \cfrac{w}{2} \\
+        0 & -\cfrac{h}{2} & 0 & \cfrac{h}{2} \\
+        0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 1
+    }
+\end{center}
+Finally, notice that what we are essentially doing is transforming the object's coordinate into our view, instead of transforming the camera into the object's view. So given the coordinate of a object's vertex \mat{x\\y\\z\\1}, the to-screen coordinate is:
+\begin{equation*}
+    \ilmat{x'\\y'\\z'\\w'} = V\times P\times R\times T \times \ilmat{x\\y\\z\\w'}
+\end{equation*}
+Rendering the x,y points, we get:
+\begin{center}
+    \image{0.45}{to-screen_1}
+\end{center}
+we can see that one issue is by the width, height, depth model, our y axis and z axis is flipped, it's not required, but to make it look more intuitive, we apply another matrix to change its axis:
+\begin{center}
+    C = \mat{
+        1 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 0 \\
+        0 & 1 & 0 & 0 \\
+        0 & 0 & 0 & 1
+    }
+\end{center}
+Moreover, if we want to visualize linear transformation $A$, we can define our transformation matrix $A$ and apply that at the very beginning, which resulted in the final formula:
+\begin{equation*}
+    \ilmat{x'\\y'\\z'\\w'} = V\times P\times R\times T \times C\times A \times \ilmat{x\\y\\z\\1}
+\end{equation*}
+\begin{center}
+    \image{0.7}{to-screen_2}
+\end{center}
+\mysection{Conclusion}
+There's a couple of key points at the very end:
+\begin{enumerate}
+    \item We cannot change the order of matrix multiplication, and the order is determined in a way such that we transform the object's coordinate into our camera's coordinate
+    \item We can see the power of linear algebra in this case, it allows us to composite matrix and describe many operations with clearity and elegance
+    \item Objects that are out of the normalized device coordinate will be clipped
+    \item We need to normalize the coordinate either after applying $P$ or applying $V$
+    \item We need to manually define a near plane and far plane, notice by the quadratic shape, the bigger the difference between them, the higher the precision
+    \item We did not use $z$ to determine blocking in this case (too hard to code), but we have the data needed to achieve it
+    \item Animation is achieved by $A' = I + (A - I) \cdot \cfrac{1}{time \text{ } interval}$
+    \item Different graphics APIs have different z-boundaries, but it doesn't affect computation (OpenGL goes from -1 to 1, DirectX goes from 0 to 1, Vulkan goes from 0 to 1, etc)
+\end{enumerate}
+\end{document}
