@@ -7,6 +7,7 @@ class Control:
     def __init__(self, title, render = None) -> None:
         self.render = render
         self.root = Tk()
+        self.root.attributes('-topmost', True)          
         self.height = self.root.winfo_screenheight()
         self.width  = self.root.winfo_screenwidth()
         # self.height = 400 # TODO
@@ -50,7 +51,19 @@ class Control:
         self.addbutton(0,7,0, 
                        "Hide basis axis" if self.render.setting["show_basis_axis"] else "Show basis axis", 
                        command = lambda *arg: self.toggle_basis_axis(), cspan=3
-        )        
+        )      
+        self.addbutton(0,8,0, 
+                       "Hide camera coordinate" if self.render.setting["show_camera_coordinate"] else "Show camera coordinate", 
+                       command = lambda *arg: self.toggle_camera_coordinate(), cspan=3
+        )            
+
+    def toggle_camera_coordinate(self):
+        self.render.setting["show_camera_coordinate"] = not self.render.setting["show_camera_coordinate"]
+        self.refresh_widget(0,8,0)
+        self.addbutton(0,8,0, 
+                       "Hide camera coordinate" if self.render.setting["show_basis_axis"] else "Show camera coordinate", 
+                       command = lambda *arg: self.toggle_camera_coordinate(), cspan=3
+        ) 
 
     def toggle_basis_axis(self):
         self.render.setting["show_basis_axis"] = not self.render.setting["show_basis_axis"]

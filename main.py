@@ -12,12 +12,13 @@ class SoftwareRender:
             "clipping_mode": False,
             "show_coordinates": False,
             "show_basis_axis": True,
+            "show_camera_coordinate": True,
             "animation_duration": 10000,
         } 
         pool.submit(self.tkinit)
         pg.init()
-        self.HEIGHT = 900
-        self.WIDTH  = 1600
+        self.HEIGHT = 1000
+        self.WIDTH  = 1000
         self.RES = self.WIDTH, self.HEIGHT
         self.H_WIDTH, self.H_HEIGHT = self.WIDTH // 2, self.HEIGHT // 2
         self.FPS = 60
@@ -75,7 +76,8 @@ class SoftwareRender:
 
     def draw(self):
         self.screen.fill(pg.Color("black"))
-        self.camera.display_coord()
+        if(self.setting["show_camera_coordinate"]):
+            self.camera.display_coord()
         if(self.setting["show_basis_axis"]):
             self.axis.draw()
         self.object.draw()

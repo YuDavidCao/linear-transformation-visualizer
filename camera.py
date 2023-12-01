@@ -47,20 +47,20 @@ class Camera:
     def display_coord(self):
         self.render.screen.blit(
             pg.font.SysFont("Arial", 30, bold=True).render(
-                str(np.around(self.position @ self.render.change_coordinate_matrix, decimals=2)),
+                "Camera Position: " + '(' + str(np.around(self.position @ self.render.change_coordinate_matrix, decimals=2))[1:-1]+ ')',
                 True,
                 pg.Color("white"),
             ),
             (10, 10),
         )
-        self.render.screen.blit(
-            pg.font.SysFont("Arial", 30, bold=True).render(
-                str(np.around(self.position @ self.rotate_matrix(), decimals=2)),
-                True,
-                pg.Color("white"),
-            ),
-            (10, 40),
-        )
+        # self.render.screen.blit(
+        #     pg.font.SysFont("Arial", 30, bold=True).render(
+        #         str(np.around(self.position @ self.rotate_matrix(), decimals=2)),
+        #         True,
+        #         pg.Color("white"),
+        #     ),
+        #     (10, 40),
+        # )
 
     def camera_yaw(self, angle):
         self.angleYaw += angle
