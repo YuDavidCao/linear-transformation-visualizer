@@ -9,10 +9,10 @@ class Control:
         self.root = Tk()
         self.height = self.root.winfo_screenheight()
         self.width  = self.root.winfo_screenwidth()
-        self.height = 400 # TODO
-        self.width  = 400 # TODO
+        # self.height = 400 # TODO
+        # self.width  = 400 # TODO
         self.root.title(title)
-        self.root.geometry(f"{self.width}x{self.height}")
+        # self.root.geometry(f"{self.width}x{self.height}")
         self.run()
         self.root.mainloop() 
 
@@ -47,6 +47,19 @@ class Control:
                        "Hide coordinates" if self.render.setting["show_coordinates"] else "Show coordinates", 
                        command = lambda *arg: self.toggle_show_coordinate(), cspan=3
         )
+        self.addbutton(0,7,0, 
+                       "Hide basis axis" if self.render.setting["show_basis_axis"] else "Show basis axis", 
+                       command = lambda *arg: self.toggle_basis_axis(), cspan=3
+        )        
+
+    def toggle_basis_axis(self):
+        self.render.setting["show_basis_axis"] = not self.render.setting["show_basis_axis"]
+        self.refresh_widget(0,7,0)
+        self.addbutton(0,7,0, 
+                       "Hide basis axis" if self.render.setting["show_basis_axis"] else "Show basis axis", 
+                       command = lambda *arg: self.toggle_basis_axis(), cspan=3
+        ) 
+
 
     def toggle_show_coordinate(self):
         self.render.setting["show_coordinates"] = not self.render.setting["show_coordinates"]

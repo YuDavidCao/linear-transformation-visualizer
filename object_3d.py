@@ -24,7 +24,7 @@ class Object3D:
         self.render = render
         self.vertices = vertices
         self.faces = faces
-        self.font = pg.font.SysFont("Arial", 30, bold=True)
+        self.font = pg.font.SysFont("Arial", 25, bold=True)
         self.color_faces = [(pg.Color("orange"), face) for face in self.faces]
         self.movement_flag, self.draw_vertices = True, True
         self.label = ""
@@ -92,17 +92,17 @@ class Object3D:
                         self.render.screen,
                         pg.Color("white"),
                         vertex,
-                        4 / original_v[index][2],
+                        25 / original_v[index][2],
                     )
                     if self.render.setting["show_coordinates"]:
                         text = self.font.render(
-                            str(
+                            '(' + str(
                                 np.round(
                                     coord_v[index]
                                     @ self.get_animation_step(),
                                     decimals=2,
                                 )[:3]
-                            ),
+                            )[1:-1] + ')',
                             True,
                             pg.Color("white"),
                         )

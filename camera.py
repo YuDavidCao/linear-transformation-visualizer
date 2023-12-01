@@ -47,7 +47,7 @@ class Camera:
     def display_coord(self):
         self.render.screen.blit(
             pg.font.SysFont("Arial", 30, bold=True).render(
-                str(np.around(self.position, decimals=2)),
+                str(np.around(self.position @ self.render.change_coordinate_matrix, decimals=2)),
                 True,
                 pg.Color("white"),
             ),
